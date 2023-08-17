@@ -2,7 +2,9 @@ FROM node:18-alpine AS development
 
 WORKDIR /habberrih/src/app
 
-COPY package*.js ./
+COPY package*.json ./
+COPY tsconfig.build.json ./
+COPY tsconfig.json ./
 
 RUN npm install
 

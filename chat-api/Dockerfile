@@ -22,6 +22,6 @@ WORKDIR /habberrih/src/app
 
 COPY --from=development /habberrih/src/app/ .
 
-EXPOSE 8080
+EXPOSE 3000
 
 CMD [ "node", "dist/main" ]

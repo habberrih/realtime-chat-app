@@ -1,0 +1,27 @@
+FROM node:18-alpine AS development
+
+WORKDIR /habberrih/src/app
+
+COPY package*.js ./
+
+RUN npm install
+
+COPY . .
+
+RUN npm run build
+
+EXPOSE 3000
+
+
+FROM node:18-alpine AS production
+
+ARG NODE_ENV=production
+ENV NODE_ENV=${NODE_ENV}
+
+WORKDIR /habberrih/src/app
+
+COPY --from=development /habberrih/src/app/ .
+
+EXPOSE 8080
+
+CMD [ "node", "dist/main" ]

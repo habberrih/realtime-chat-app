@@ -17,7 +17,7 @@ services:
       - postgres
 
     environment:
-      DATABASE_URL: postgres://user:password@postgres:5432/chat
+      DATABASE_URL: postgres://user:password@chat_db:5432/chat
       NODE_ENV: development
       PORT: 3000
 
@@ -45,13 +45,15 @@ services:
   postgres:
     image: postgres:15.2-alpine
     
+    container_name: chat_db
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
       POSTGRES_DB: chat
+      PGDATA: /data/postgres
     
     ports:
-      - 5437:5432
+      - 5432:5432
 
   postgres_admin:
     image: dpage/pgadmin4:latest

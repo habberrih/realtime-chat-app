@@ -1,10 +1,9 @@
 import { Body, Controller, Post, Get, Patch, Param } from '@nestjs/common';
 import { UserService } from '../service/user-service/user.service';
-import { Observable, of, switchMap } from 'rxjs';
 import { UserInterface } from '../model/user.interface';
 import { CreateUserDto } from '../model/dto/createUser.dto';
-import { log } from 'util';
 import { UserHelperService } from '../service/user-helper/user-helper.service';
+import { UserEntity } from '../model/user.entity';
 
 @Controller('users')
 export class UserController {
@@ -13,10 +12,10 @@ export class UserController {
     private userHelperService: UserHelperService
   ) {}
 
-  @Get()
-  getAllUsers() {
-    // return this.userService.getAllUsers();
-  }
+  // @Get()
+  // getAllUsers() {
+  //   return this.userService.getAllUsers();
+  // }
 
   @Get(':id')
   getUserById(@Param('id') id: number) {
@@ -24,14 +23,12 @@ export class UserController {
   }
 
   @Post()
-  httpCreateUser(
+  async httpCreateUser(
     @Body() createUserDto: CreateUserDto
-  ): Observable<UserInterface> {
-    return this.userHelperService
-      .createUserDtoToEntity(createUserDto)
-      .pipe(
-        switchMap((user: UserInterface) => this.userService.createUser(user))
-      );
+  ): Promise<UserEntity> {
+    const userEntity: UserInterface =
+      this.userHelperService.createUserDtoToEntity(createUserDto);
+    return this.userService.createUser(userEntity);
   }
 
   @Post()

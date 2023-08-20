@@ -17,7 +17,7 @@ services:
       - postgres
 
     environment:
-      DATABASE_URL: postgres://user:password@chat_db:5432/chat
+      DATABASE_URL: postgresql://user:password@chat_db:5432/chat
       NODE_ENV: development
       PORT: 3000
 
@@ -51,7 +51,8 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: chat
       PGDATA: /data/postgres
-    
+    volumes:
+      - postgres-db:/data/postgres
     ports:
       - 5432:5432
 
@@ -67,3 +68,8 @@ services:
 
     ports:
       - 5050:80
+
+
+volumes:
+  postgres-db:
+    driver: local

@@ -1,12 +1,15 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
 import { UserEntity } from '../../model/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserInterface } from 'src/user/model/user.interface';
-import { Observable, from } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
 
-const bcrypt = require('bcrypt');
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class UserService {
@@ -15,44 +18,40 @@ export class UserService {
     private readonly userRepository: Repository<UserEntity>
   ) {}
 
-  createUser(newUser: UserInterface): Observable<UserInterface> {
-    return this.IsEmailExists(newUser.email).pipe(
-      switchMap((exists: boolean) => {
-        if (exists === true) {
-          return this.hashPassword(newUser.password).pipe(
-            switchMap((hashedPassword: string) => {
-              return from(
-                this.userRepository.save({
-                  username: newUser.username,
-                  email: newUser.email,
-                  password: hashedPassword,
-                })
-              ).pipe(switchMap((user: UserInterface) => this.findOne(user.id)));
-            })
-          );
-        } else {
-          throw new HttpException('Email already exists', HttpStatus.CONFLICT);
-        }
-      })
-    );
+  // async createUser(user: UserInterface): Promise<UserInterface> {
+  //   return this.userRepository.create(user);
+  // }
+
+  async getAllUsers(): Promise<any> {
+    // return await this.userRepository.find({});
   }
 
-  private hashPassword(password: string): Observable<string> {
-    return from<string>(bcrypt.hash(password, 12));
-  }
+  async createUser(newUser: UserInterface): Promise<UserEntity> {
+    const isEmailExists = async () => {
+      const is = await this.userRepository.findOne({
+        where: {
+          email: newUser.email,
+        },
+      });
+      if (is) return true;
+      return false;
+    };
+    const isUsernameExists = async () => {
+      const is = await this.userRepository.findOne({
+        where: {
+          username: newUser.username,
+        },
+      });
+      if (is) return true;
+      return false;
+    };
 
-  private findOne(id: number): Observable<UserInterface> {
-    return from(this.userRepository.findOne({ where: { id } }));
-  }
-  private IsEmailExists(email: string): Observable<boolean> {
-    return from(this.userRepository.findOne({ where: { email } })).pipe(
-      map((user: UserInterface) => {
-        if (user) {
-          return true;
-        } else {
-          return false;
-        }
-      })
-    );
+    if ((await isEmailExists()) || (await isUsernameExists())) {
+      throw new ConflictException('Email or Username already exists');
+    }
+    newUser.password = await bcrypt.hash(newUser.password, 12);
+
+    const addedUser = this.userRepository.create(newUser);
+    return this.userRepository.save(addedUser);
   }
 }

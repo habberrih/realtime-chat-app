@@ -1,14 +1,8 @@
-import {
-  BeforeInsert,
-  Column,
-  Entity,
-  PrimaryGeneratedColumn,
-  Unique,
-} from 'typeorm';
+import { BeforeInsert, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class UserEntity {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn()
   id: number;
 
   @Column({ nullable: false, unique: true })
@@ -23,6 +17,5 @@ export class UserEntity {
   @BeforeInsert()
   emailToLowerCase() {
     this.email = this.email.toLowerCase();
-    this.username = this.username.toLowerCase();
   }
 }

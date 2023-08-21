@@ -4,26 +4,28 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
+
 import { UserEntity } from '../../model/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserInterface } from 'src/user/model/user.interface';
 
-import * as bcrypt from 'bcryptjs';
 import {
   IPaginationOptions,
   Pagination,
   paginate,
 } from 'nestjs-typeorm-paginate';
+import { AuthService } from 'src/auth/service/auth.service';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(UserEntity)
-    private readonly userRepository: Repository<UserEntity>
+    private readonly userRepository: Repository<UserEntity>,
+    private authService: AuthService
   ) {}
 
-  async login(user: UserInterface): Promise<boolean> {
+  async login(user: UserInterface): Promise<UserInterface> {
     const userExists = await this.userRepository.findOne({
       where: {
         email: user.email,
@@ -40,7 +42,7 @@ export class UserService {
       throw new NotFoundException('User not found');
     }
 
-    const isPasswordMatch = await bcrypt.compare(
+    const isPasswordMatch = await this.authService.comparePasswords(
       user.password,
       userExists.password
     );
@@ -49,11 +51,13 @@ export class UserService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const foundUser = await this.userRepository.findOne({
-      where: { id: user.id },
+    const foundUser: UserInterface = await this.userRepository.findOne({
+      where: { id: userExists.id },
     });
 
-    return true;
+    const token: string = await this.authService.generateJwtToken(foundUser);
+    foundUser.token = token;
+    return foundUser;
   }
 
   async getAllUsers(
@@ -77,7 +81,7 @@ export class UserService {
     if (emailExists || UsernameExists) {
       throw new ConflictException('Email or Username already exists');
     }
-    newUser.password = await bcrypt.hash(newUser.password, 12);
+    newUser.password = await this.authService.hashPassword(newUser.password);
 
     const addedUser = this.userRepository.create(newUser);
     await this.userRepository.save(addedUser);

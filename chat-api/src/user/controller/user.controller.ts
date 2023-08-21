@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from '../service/user-service/user.service';
 import { UserInterface } from '../model/user.interface';
@@ -14,6 +15,8 @@ import { UserHelperService } from '../service/user-helper/user-helper.service';
 import { UserEntity } from '../model/user.entity';
 import { Pagination } from 'nestjs-typeorm-paginate';
 import { LoginUserDto } from '../model/dto/login-user.dto';
+import { LoginResponseInterface } from '../model/login-response.interface';
+import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 
 @Controller('users')
 export class UserController {
@@ -22,6 +25,7 @@ export class UserController {
     private userHelperService: UserHelperService
   ) {}
 
+  @UseGuards(JwtAuthGuard)
   @Get()
   async findAll(
     @Query('page') page: number = 1,
@@ -35,6 +39,7 @@ export class UserController {
     });
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
   async getUserById(@Param('id') id: number) {
     // return this.userService.getUserById(id);
@@ -50,9 +55,21 @@ export class UserController {
   }
 
   @Post('login')
-  async login(@Body() loginUserDto: LoginUserDto): Promise<boolean> {
+  async login(
+    @Body() loginUserDto: LoginUserDto
+  ): Promise<LoginResponseInterface> {
     const loginUserEntity: UserInterface =
       this.userHelperService.loginUserDtoToEntity(loginUserDto);
-    return this.userService.login(loginUserEntity);
+    const addedUser: UserInterface =
+      await this.userService.login(loginUserEntity);
+
+    const loginResponse: LoginResponseInterface = {
+      id: addedUser.id,
+      username: addedUser.username,
+      email: addedUser.email,
+      access_token: addedUser.token,
+    };
+
+    return loginResponse;
   }
 }

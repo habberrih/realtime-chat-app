@@ -16,10 +16,8 @@ services:
     depends_on:
       - postgres
 
-    environment:
-      DATABASE_URL: postgresql://user:password@chat_db:5432/chat
-      NODE_ENV: development
-      PORT: 3000
+    env_file:
+      - ./chat-api/.env
 
     ports:
       - 3000:3000
@@ -46,11 +44,8 @@ services:
     image: postgres:15.2-alpine
     
     container_name: chat_db
-    environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: chat
-      PGDATA: /data/postgres
+    env_file:
+      - ./chat-api/.env
     volumes:
       - postgres-db:/data/postgres
     ports:
@@ -62,9 +57,8 @@ services:
     depends_on:
       - postgres
     
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: password
+    env_file:
+      - ./chat-api/.env
 
     ports:
       - 5050:80

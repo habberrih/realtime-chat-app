@@ -1,6 +1,9 @@
 import { Component } from '@angular/core';
 import { Form, FormControl, FormGroup, Validators } from '@angular/forms';
 import { CustomValidators } from '../../_helpers/custom-validators';
+import { UserService } from '../../services/user-service/user.service';
+import { Router } from '@angular/router';
+import { tap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-register',
@@ -19,7 +22,7 @@ export class RegisterComponent {
       validators: CustomValidators.passwordsMatching,
     }
   );
-  constructor() {}
+  constructor(private userService: UserService, private router: Router) {}
 
   get email(): FormControl {
     return this.form.get('email') as FormControl;
@@ -37,6 +40,15 @@ export class RegisterComponent {
   }
 
   register() {
-    console.log(this.form.value);
+    if (this.form.valid) {
+      this.userService
+        .createUser({
+          email: this.email.value,
+          username: this.username.value,
+          password: this.password.value,
+        })
+        .pipe(tap(() => this.router.navigate(['../login'])))
+        .subscribe();
+    }
   }
 }

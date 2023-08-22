@@ -66,6 +66,14 @@ export class UserService {
     return paginate<UserEntity>(this.userRepository, options);
   }
 
+  async getOneUser(id: string): Promise<UserInterface> {
+    return this.userRepository.findOneOrFail({
+      where: {
+        id: id,
+      },
+    });
+  }
+
   async createUser(newUser: UserInterface): Promise<UserEntity> {
     const emailExists = await this.userRepository.findOne({
       where: {

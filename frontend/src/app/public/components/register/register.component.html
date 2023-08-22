@@ -29,10 +29,10 @@
 
                         <mat-form-field>
                             <input type="password" matInput placeholder="Confirm Password" formControlName="confirmPassword">
-                            <mat-error *ngIf="confirmPassword.touched && form.hasError('passwordsNotMatching')">Password not matching</mat-error>
                         </mat-form-field>
 
                         <mat-hint *ngIf="!form.valid"><small>Please fill out all needed information</small></mat-hint>
+                        <mat-error *ngIf="confirmPassword.touched && form.hasError('passwordsNotMatching')">Password not matching</mat-error>
 
                         <div class="submit_btn">
                             <button mat-button type="submit" [disabled]="!form.valid">Register</button>

@@ -10,6 +10,10 @@ export class AuthService {
   async generateJwtToken(user: UserInterface): Promise<string> {
     return this.jwtService.signAsync({ user });
   }
+
+  async verifyJwtToken(jwtToken: string): Promise<any> {
+    return this.jwtService.verifyAsync(jwtToken);
+  }
   async hashPassword(password: string): Promise<string> {
     return bcrypt.hash(password, 10);
   }

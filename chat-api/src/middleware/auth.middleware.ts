@@ -35,7 +35,7 @@ export class AuthMiddleware implements NestMiddleware {
         id: user.id,
         username: user.username,
         email: user.email,
-        // role: decodedToken.role,
+        // role: user.role,
       };
       next();
     } catch (error) {

@@ -11,6 +11,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { AuthMiddleware } from './middleware/auth.middleware';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -23,18 +24,21 @@ import { AuthMiddleware } from './middleware/auth.middleware';
     }),
     UserModule,
     AuthModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(AuthMiddleware)
-      .exclude(
-        { path: '/api/users', method: RequestMethod.POST },
-        { path: '/api/users/login', method: RequestMethod.POST }
-      )
-      .forRoutes('');
-  }
-}
+export class AppModule {}
+
+// implements NestModule {
+//   configure(consumer: MiddlewareConsumer) {
+//     consumer
+//       .apply(AuthMiddleware)
+//       .exclude(
+//         { path: '/api/users', method: RequestMethod.POST },
+//         { path: '/api/users/login', method: RequestMethod.POST }
+//       )
+//       .forRoutes('');
+//   }
+// }

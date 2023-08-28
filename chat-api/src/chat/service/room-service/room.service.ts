@@ -35,7 +35,9 @@ export class RoomService {
     const query = this.roomRepository
       .createQueryBuilder('rooms')
       .leftJoin('rooms.users', 'users')
-      .where('users.id = :userId', { userId });
+      .where('users.id = :userId', { userId })
+      .leftJoinAndSelect('rooms.users', 'all_users')
+      .orderBy('rooms.updatedAt', 'DESC');
 
     return paginate(query, options);
   }

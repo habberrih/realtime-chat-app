@@ -22,15 +22,11 @@ export class ChatService {
     return this.socket.fromEvent<RoomPaginateInterface>('rooms');
   }
 
-  createRoom() {
-    const user2: UserInterface = {
-      id: 'a2aabe55-d56f-4209-83e2-351f2d3ac36d',
-    };
-    const room: RoomInterface = {
-      name: 'room1',
-      users: [user2],
-    };
+  emitPaginateRooms(limit: number, page: number) {
+    this.socket.emit('paginateRooms', { limit, page });
+  }
 
-    this.socket.emit('createRoom', room);
+  createRoom() {
+    // this.socket.emit('createRoom', room);
   }
 }

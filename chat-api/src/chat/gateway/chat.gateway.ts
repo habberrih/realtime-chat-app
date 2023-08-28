@@ -12,6 +12,7 @@ import { UserInterface } from 'src/user/model/user.interface';
 import { UserService } from 'src/user/service/user-service/user.service';
 import { RoomService } from '../service/room-service/room.service';
 import { RoomInterface } from '../model/room.interface';
+import { PageInterface } from '../model/page.interface';
 
 @WebSocketGateway({
   cors: {
@@ -46,11 +47,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         return this.disconnect(socket);
       } else {
         socket.data.user = user;
-
         const rooms = await this.roomService.getRoomForUser(user.id, {
           page: 1,
           limit: 10,
         });
+
+        //? subtract page -1 to match the angular material paginator
+        rooms.meta.currentPage = rooms.meta.currentPage - 1;
+
         return this.server.to(socket.id).emit('rooms', rooms);
       }
     } catch (error) {
@@ -73,5 +77,23 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     room: RoomInterface
   ): Promise<RoomInterface> {
     return await this.roomService.createRoom(room, socket.data.user.id);
+  }
+
+  @SubscribeMessage('paginateRooms')
+  async onPaginateRoom(socket: Socket, page: PageInterface) {
+    page.limit = page.limit > 100 ? 100 : page.limit;
+
+    //? add page +1 to match angular material paginator
+    page.page = page.page + 1;
+
+    const rooms = await this.roomService.getRoomForUser(
+      socket.data.user.id,
+      page
+    );
+
+    //? subtract page -1 to match the angular material paginator
+    rooms.meta.currentPage = rooms.meta.currentPage - 1;
+
+    return this.server.to(socket.id).emit('rooms', rooms);
   }
 }

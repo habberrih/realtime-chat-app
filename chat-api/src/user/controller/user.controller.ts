@@ -38,6 +38,10 @@ export class UserController {
       route: 'http://localhost:3000/api/users',
     });
   }
+  @Get('/search-username')
+  async findAllByUsername(@Query('username') username: string) {
+    return this.userService.findAllByUsername(username);
+  }
 
   @UseGuards(JwtAuthGuard)
   @Get(':id')
@@ -48,7 +52,7 @@ export class UserController {
   @Post()
   async httpCreateUser(
     @Body() createUserDto: CreateUserDto
-  ): Promise<UserEntity> {
+  ): Promise<UserInterface> {
     const userEntity: UserInterface =
       this.userHelperService.createUserDtoToEntity(createUserDto);
     return this.userService.createUser(userEntity);

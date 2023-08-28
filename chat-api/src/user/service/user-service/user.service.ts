@@ -7,7 +7,7 @@ import {
 
 import { UserEntity } from '../../model/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { UserInterface } from 'src/user/model/user.interface';
 
 import {
@@ -28,7 +28,7 @@ export class UserService {
   async login(user: UserInterface): Promise<UserInterface> {
     const userExists = await this.userRepository.findOne({
       where: {
-        email: user.email,
+        email: user.email.toLowerCase(),
       },
       select: {
         id: true,
@@ -66,6 +66,14 @@ export class UserService {
     return paginate<UserEntity>(this.userRepository, options);
   }
 
+  async findAllByUsername(username: string): Promise<UserInterface[]> {
+    return this.userRepository.find({
+      where: {
+        username: Like(`%${username}%`),
+      },
+    });
+  }
+
   async getOneUser(id: string): Promise<UserInterface> {
     return this.userRepository.findOneOrFail({
       where: {
@@ -74,7 +82,7 @@ export class UserService {
     });
   }
 
-  async createUser(newUser: UserInterface): Promise<UserEntity> {
+  async createUser(newUser: UserInterface): Promise<UserInterface> {
     const emailExists = await this.userRepository.findOne({
       where: {
         email: newUser.email,
@@ -93,7 +101,6 @@ export class UserService {
 
     const addedUser = this.userRepository.create(newUser);
     await this.userRepository.save(addedUser);
-    delete addedUser.password;
-    return addedUser;
+    return this.userRepository.findOne({ where: { id: addedUser.id } });
   }
 }

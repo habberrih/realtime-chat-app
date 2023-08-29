@@ -11,6 +11,9 @@ import { catchError, tap } from 'rxjs/operators';
 export class UserService {
   constructor(private http: HttpClient, private snackBar: MatSnackBar) {}
 
+  findByUsername(username: string): Observable<UserInterface[]> {
+    return this.http.get<UserInterface[]>(`api/users?username=${username}`);
+  }
   createUser(user: UserInterface): Observable<UserInterface> {
     return this.http.post<UserInterface>('api/users', user).pipe(
       tap((createdUser: UserInterface) =>

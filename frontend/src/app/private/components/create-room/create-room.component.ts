@@ -54,7 +54,7 @@ export class CreateRoomComponent {
     this.users.push(userFormControl);
   }
 
-  removeUser(userId: string) {
+  removeUser(userId: any) {
     this.users.removeAt(
       this.users.value.findIndex((user: UserInterface) => user.id === userId)
     );

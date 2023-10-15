@@ -14,14 +14,20 @@ export class ConnectedUserService {
   async createNewConnection(
     connectedUser: ConnectedUserInterface
   ): Promise<ConnectedUserInterface> {
-    return this.connectedUserRepository.save(connectedUser);
+    return await this.connectedUserRepository.save(
+      this.connectedUserRepository.create(connectedUser)
+    );
   }
 
   async findByUser(user: UserInterface): Promise<ConnectedUserInterface[]> {
-    return this.connectedUserRepository.find({ where: { user } });
+    return await this.connectedUserRepository.find({ where: { user } });
   }
 
   async deleteConnectionBySocketId(socketId: string) {
     return this.connectedUserRepository.delete({ socketId });
+  }
+
+  async deleteAllConnetections() {
+    await this.connectedUserRepository.createQueryBuilder().delete().execute();
   }
 }
